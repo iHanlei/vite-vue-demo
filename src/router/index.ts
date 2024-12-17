@@ -1,26 +1,26 @@
 import { createWebHistory, createRouter } from "vue-router"
 
-import QRCode from "@/views/QRCode.vue"
-import MediaShare from "@/views/MediaShare.vue"
-import NotFount from "@/views/404.vue"
-
 const routes = [
   {
     path: "/",
-    redirect: "/qr",
+    redirect: "/index",
+  },
+  {
+    path: "/index",
+    component: () => import("@/views/Index.vue"),
   },
   {
     path: "/qr",
-    component: QRCode,
+    component: () => import("@/views/QRCode.vue"),
   },
   {
-    path: "/share",
-    component: MediaShare,
+    path: "/media",
+    component: () => import("@/views/Media.vue"),
   },
   {
     path: "/:pathMatch(.*)*", // 捕获所有未定义的路由
     name: "404",
-    component: NotFount,
+    component: () => import("@/views/404.vue"),
   },
 ]
 
