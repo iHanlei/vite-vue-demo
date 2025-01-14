@@ -1,29 +1,113 @@
-import Clipboard from "clipboard"
+import BigNumber from 'bignumber.js'
 
 /**
- * 复制到剪贴板
- * @param text 复制内容
- * @param selector 触发复制的目标元素选择器（如类名或 ID）
+ * 时间格式化
+ * @param {Date | number | string} time - 需要格式化的时间
+ * @param {string} fmt - 格式化模板，如 "yyyy-MM-dd" 或 "yyyy-MM-dd HH:mm:ss"
+ * @returns {string} 格式化后的时间字符串
  */
-export const copyClipboard = (text: string, selector: string = '.copy') => {
-  // 检查传入的选择器是否有效
-  if (!selector || !document.querySelector(selector)) {
-    console.error("Invalid selector provided.")
-    return
+export function formatTime(
+  time: Date | number | string,
+  fmt: "yyyy-MM-dd" | "yyyy-MM-dd HH:mm:ss" | string = "yyyy-MM-dd HH:mm:ss"
+): string {
+  if (!time) return "";
+
+  // 统一处理时间对象
+  const date = new Date(time);
+  if (isNaN(date.getTime())) {
+    console.error("Invalid time input");
+    return "";
   }
 
-  // 创建 Clipboard 实例
-  const clipboard = new Clipboard(selector, {
-    text: () => text,
-  })
+  // 格式化映射对象
+  const formatTokens: Record<string, number | string> = {
+    "y+": date.getFullYear(), // 年
+    "M+": date.getMonth() + 1, // 月
+    "d+": date.getDate(), // 日
+    "H+": date.getHours(), // 小时
+    "m+": date.getMinutes(), // 分钟
+    "s+": date.getSeconds(), // 秒
+    "q+": Math.floor((date.getMonth() + 3) / 3), // 季度
+    S: date.getMilliseconds(), // 毫秒
+  };
 
-  clipboard.on("success", () => {
-    console.info("Copy success")
-    clipboard.destroy() // 复制成功后销毁实例
-  })
+  // 替换年份
+  if (/(y+)/.test(fmt)) {
+    fmt = fmt.replace(
+      RegExp.$1,
+      String(formatTokens["y+"]).slice(4 - RegExp.$1.length)
+    );
+  }
 
-  clipboard.on("error", () => {
-    console.error("Copy fail")
-    clipboard.destroy() // 复制失败后销毁实例
-  })
+  // 替换其他时间标记
+  for (const token in formatTokens) {
+    if (new RegExp(`(${token})`).test(fmt)) {
+      const value = formatTokens[token];
+      fmt = fmt.replace(
+        RegExp.$1,
+        RegExp.$1.length === 1 ? String(value) : `00${value}`.slice(-RegExp.$1.length)
+      );
+    }
+  }
+
+  return fmt;
+}
+
+/**
+ * 相乘
+ */
+export const toMultiplied = (
+  target: string | number,
+  multiplier: string | number,
+  precision = 2,
+  bigNumberType: BigNumber.RoundingMode = BigNumber.ROUND_DOWN
+): string => {
+  return new BigNumber(target)
+    .multipliedBy(multiplier)
+    .decimalPlaces(precision, bigNumberType)
+    .toFixed()
+}
+
+/**
+ * 相除
+ */
+export const toDivided = (
+  target: string | number,
+  divisor: string | number,
+  precision = 2,
+  bigNumberType: BigNumber.RoundingMode = BigNumber.ROUND_DOWN
+): string => {
+  if (new BigNumber(divisor).isZero()) throw new Error('Divisor cannot be zero')
+  return new BigNumber(target).dividedBy(divisor).decimalPlaces(precision, bigNumberType).toFixed()
+}
+
+/**
+ * 相加
+ */
+export const toPlus = (
+  target: string | number,
+  addend: string | number,
+  precision = 2,
+  bigNumberType: BigNumber.RoundingMode = BigNumber.ROUND_DOWN
+): string => {
+  return new BigNumber(target).plus(addend).decimalPlaces(precision, bigNumberType).toFixed()
+}
+
+/**
+ * 相减
+ */
+export const toMinus = (
+  target: string | number,
+  subtrahend: string | number,
+  precision = 2,
+  bigNumberType: BigNumber.RoundingMode = BigNumber.ROUND_DOWN
+): string => {
+  return new BigNumber(target).minus(subtrahend).decimalPlaces(precision, bigNumberType).toFixed()
+}
+
+/**
+ * 判断大小
+ */
+export const isGreaterThan = (number1: string | number, number2: string | number): boolean => {
+  return new BigNumber(number1).isGreaterThan(number2)
 }

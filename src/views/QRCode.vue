@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { copyClipboard } from "@/utils"
+import { copyClipboard } from "@/composables/useClipboard"
 import QRCode from "@/components/QRcode.vue"
 </script>
 

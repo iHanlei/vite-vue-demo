@@ -14,10 +14,6 @@ const routes = [
     component: () => import("@/views/QRCode.vue"),
   },
   {
-    path: "/media",
-    component: () => import("@/views/Media.vue"),
-  },
-  {
     path: "/:pathMatch(.*)*", // 捕获所有未定义的路由
     name: "404",
     component: () => import("@/views/404.vue"),
